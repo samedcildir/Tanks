@@ -11,7 +11,6 @@ namespace Tanks
     {
         protected List<Tank> tanks;
         protected List<Bullet> bullets = new List<Bullet>();
-        protected List<Laser> lasers = new List<Laser>();
 
         public double damage { get; protected set; }
         public int id { get; private set; }
@@ -41,20 +40,7 @@ namespace Tanks
                 }
             }
         }
-
-        public void StepLaser()
-        {
-            foreach (var l in lasers.ToList())
-            {
-                if (l.fireTime + l.fireDelay > DateTime.Now) continue;
-                foreach (var t in tanks)
-                {
-                    // TODO: by using startPoint and orinetation, find endPoint
-                    l.startPoint = t.pos;
-                }
-            }
-        }
-
+        
         protected Weapon(int id, double weight, int reloadTime, List<Tank> tanks)
         {
             this.id = id;
@@ -80,20 +66,6 @@ namespace Tanks
         {
             pos.X += (float)(this.speed * Math.Cos(orientation));
             pos.Y += (float)(this.speed * Math.Cos(orientation));
-        }
-    }
-    public abstract class Laser
-    {
-        public PointF startPoint;
-        public PointF endPoint;
-        public double orientation;
-        public DateTime fireTime;
-        public TimeSpan fireDelay = TimeSpan.FromSeconds(1);
-
-        protected Laser(double orientation)
-        {
-            this.orientation = orientation;
-            this.fireTime = DateTime.Now;
         }
     }
 }
