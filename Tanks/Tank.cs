@@ -22,8 +22,9 @@ namespace Tanks
 
         public const double ultimate_max_acc = 2;
         private double max_acc = ultimate_max_acc;
-        public double currentAcc;
-        public double targetAcc;
+
+        private double linear_acc_to_angular_acc_factor = 0.3;
+        public double targetOrientation;
 
         public double health { get; private set; }
         public int id { get; private set; }
@@ -51,7 +52,6 @@ namespace Tanks
             health = 100;
             currentSpeed = 0;
             targetSpeed = 0;
-            currentAcc = 0;
 
             this.pos = pos;
             this.color = color;
@@ -69,7 +69,7 @@ namespace Tanks
         }
 
         // Returns the results that came from sensors
-        private List<string> RunSensors()
+        public List<string> RunSensors()
         {
             List<string> results = new List<string>();
             sensors.ForEach(s => results.Add(s.Run(this)));
@@ -102,29 +102,38 @@ namespace Tanks
             // TODO: fix this its not looking good.
             pos = new PointF(pos.X + (float)(currentSpeed * Math.Cos(orientation)), pos.Y + (float)(currentSpeed * Math.Sin(orientation)));
         }
-
         private void changeSpeed()
         {
             if (targetSpeed > max_speed) targetSpeed = max_speed;
-            if (targetAcc > max_acc) targetAcc = max_acc;
 
-            // TODO: Not complete yet
+            if (currentSpeed > targetSpeed)
+            {
+                currentSpeed -= max_acc;
+                if (currentSpeed < targetSpeed) currentSpeed = targetSpeed;
+            }
+            if (currentSpeed < targetSpeed)
+            {
+                currentSpeed += max_acc;
+                if (currentSpeed > targetSpeed) currentSpeed = targetSpeed;
+            }
         }
-
-        public class WeaponCommand
+        private void changeOrientation()
         {
-            public int weaponID;
-            public int targetID;
+            if (orientation > targetOrientation)
+            {
+                orientation += max_acc * linear_acc_to_angular_acc_factor;
+                if (orientation < targetOrientation) orientation = targetOrientation;
+            }
+            if (orientation < targetOrientation)
+            {
+                orientation += max_acc * linear_acc_to_angular_acc_factor;
+                if (orientation > targetOrientation) orientation = targetOrientation;
+            }
         }
-        public class MoveCommand
-        {
-            public double targetSpeed = double.NegativeInfinity;
-            public double targetAcc = double.NegativeInfinity;
 
-            // TODO: we also should have angulars
-        }
         // if the tank's ai cannot send data in time then we call this function without parameters.
-        public List<String> StepTank(List<WeaponCommand> weaponCommands = null, MoveCommand moveCommand = null)
+        // this function will fire 
+        public void StepTank(List<GameManager.WeaponCommand> weaponCommands = null, GameManager.MoveCommand moveCommand = null)
         {
             foreach (var w in weapons)
                 w.StepBullets();
@@ -136,10 +145,12 @@ namespace Tanks
             if (moveCommand != null)
             {
                 targetSpeed = moveCommand.targetSpeed;
-                targetAcc = moveCommand.targetAcc;
+                targetOrientation = moveCommand.targetOrientation;
             }
 
-            return RunSensors();
+            changeSpeed();
+            changeOrientation();
+            Move();
         }
     }
 }
