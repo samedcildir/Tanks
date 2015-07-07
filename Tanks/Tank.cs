@@ -99,7 +99,6 @@ namespace Tanks
 
         private void Move()
         {
-            // TODO: fix this its not looking good.
             pos = new PointF(pos.X + (float)(currentSpeed * Math.Cos(orientation)), pos.Y + (float)(currentSpeed * Math.Sin(orientation)));
         }
         private void changeSpeed()
@@ -151,6 +150,11 @@ namespace Tanks
             changeSpeed();
             changeOrientation();
             Move();
+        }
+
+        public void Draw(Graphics g)
+        {
+            // TODO: fill this, draw tank and bullets
         }
     }
 }

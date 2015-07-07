@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading;
 using System.Diagnostics;
 using System.IO;
+using Newtonsoft.Json;
 
 namespace Tanks
 {
@@ -12,7 +13,7 @@ namespace Tanks
     {
         private List<Process> processes = new List<Process>();
 
-        private List<Tank> tanks = new List<Tank>();
+        public List<Tank> tanks = new List<Tank>();
 
         private List<string> lastCommand = new List<string>();
         private List<bool> lastCommandDone = new List<bool>();
@@ -20,21 +21,40 @@ namespace Tanks
 
         private System.Timers.Timer sensorTimer;
 
+        public class Command
+        {
+            public List<WeaponCommand> weaponCommand;
+            public MoveCommand moveCommand;
+        }
         public class WeaponCommand
         {
             public int weaponID;
             public int targetID;
         }
-
         public class MoveCommand
         {
             public double targetSpeed;
             public double targetOrientation;
         }
 
-        private KeyValuePair<List<WeaponCommand>, MoveCommand> getCommandFromString(string commandString)
+        private Command getCommandFromString(string commandJson)
         {
+            return JsonConvert.DeserializeObject<Command>(commandJson);
+        }
 
+        class TankProperties
+        {
+            // TODO: fill this
+        }
+
+        private Tank getTankFromString(string tankJson)
+        {
+            TankProperties tp = JsonConvert.DeserializeObject<TankProperties>(tankJson);
+            Tank t = null;
+
+            // TODO: create tank using TankProperties
+
+            return t;
         }
 
         public GameManager(List<string> executablePaths)
@@ -43,7 +63,7 @@ namespace Tanks
             sensorTimer.Interval = 40;
             sensorTimer.Elapsed += sensorTimer_Elapsed;
 
-            /// TODO: create executables here(bind stdins and stdouts)
+            /// create executables here(bind stdins and stdouts)
 
             for(int i = 0; i < executablePaths.Count; i++)
             {
@@ -68,7 +88,9 @@ namespace Tanks
                                 if (started)
                                 {
                                     var command = getCommandFromString(lastCommand[i].Split('\n')[0]);
-                                    tanks[i].StepTank(command.Key, command.Value);
+                                    // TODO: this function should be called simultaneusly in all tanks
+                                    // Fix It
+                                    tanks[i].StepTank(command.weaponCommand, command.moveCommand);
 
                                     lastCommand[i] = "";
                                     lastCommandDone[i] = false;
@@ -88,11 +110,6 @@ namespace Tanks
                 Console.WriteLine("An Error Occurred!!!");
                 return;
             }
-        }
-
-        private Tank getTankFromString(string tankString)
-        {
-
         }
 
         private bool FirstRun()
@@ -156,7 +173,7 @@ namespace Tanks
             List<string> sensorResultsAsString = new List<string>();
             sensorResults.ForEach(sr => sensorResultsAsString.Add(getSensorResultString(sr)));
 
-            /// TODO: send sensor results to each process through stdin
+            /// send sensor results to each process through stdin
             for (int i = 0; i < processes.Count; i++)
                 processes[i].StandardInput.WriteLine(sensorResults[i]);
         }
