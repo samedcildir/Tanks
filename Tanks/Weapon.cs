@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,13 +12,15 @@ namespace Tanks
     {
         protected List<Tank> tanks;
         protected List<Bullet> bullets = new List<Bullet>();
+        public Color color { get; set; }
 
         public double damage { get; protected set; }
         public int id { get; private set; }
         public double weight { get; private set; }
         public int reloadTime { get; private set; }
+
         abstract public void Fire(Tank t, int targetID);
-        abstract public void DrawBullets();
+        abstract public void Draw(Graphics g, Tank t);
 
         private bool isInside(PointF center, double width, double height, PointF p)
         {
@@ -40,26 +43,45 @@ namespace Tanks
                 }
             }
         }
-        
-        protected Weapon(int id, double weight, int reloadTime, List<Tank> tanks)
+
+        protected Weapon(int id, double weight, int reloadTime, List<Tank> tanks, Color color)
         {
             this.id = id;
             this.weight = weight;
             this.reloadTime = reloadTime;
             this.tanks = tanks;
+            this.color = color;
         }
     }
     public abstract class Bullet
     {
+        private const int width = 2;
+        private const int height = 10;
+
+        public Color color;
         public PointF pos;
         protected double speed;
-        protected double orientation;
+        protected double orientation; // in degrees
 
-        protected Bullet(double speed, double orientation, PointF pos)
+        public virtual void Draw(Graphics g, Tank t)
+        {
+            // TODO: Fill here
+
+            Rectangle rect = new Rectangle((int)pos.X - width / 2, (int)pos.Y - height / 2, width, height);
+
+            Matrix m = new Matrix();
+            m.RotateAt((float)orientation, pos);
+
+            g.FillRectangle(new SolidBrush(color), rect);
+            g.ResetTransform();
+        }
+
+        protected Bullet(double speed, double orientation, PointF pos, Color color)
         {
             this.speed = speed;
             this.orientation = orientation;
             this.pos = pos;
+            this.color = color;
         }
 
         public virtual void Step()

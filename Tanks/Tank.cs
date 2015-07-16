@@ -23,14 +23,14 @@ namespace Tanks
         public const double ultimate_max_acc = 2;
         private double max_acc = ultimate_max_acc;
 
-        private double linear_acc_to_angular_acc_factor = 0.3;
-        public double targetOrientation;
+        private double linear_acc_to_angular_acc_factor = 60;
+        public double targetOrientation; // in degrees
 
         public double health { get; private set; }
         public int id { get; private set; }
         public Color color { get; set; }
         public PointF pos { get; private set; }
-        public double orientation { get; private set; }
+        public double orientation { get; private set; } // in degrees
         private double ___weight;
         public double weight
         {
@@ -154,7 +154,10 @@ namespace Tanks
 
         public void Draw(Graphics g)
         {
-            // TODO: fill this, draw tank and bullets
+            // TODO: fill this, draw tank
+
+            sensors.ForEach(s => s.Draw(g, this));
+            weapons.ForEach(w => w.Draw(g, this));
         }
     }
 }

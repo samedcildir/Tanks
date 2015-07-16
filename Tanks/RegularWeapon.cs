@@ -11,12 +11,8 @@ namespace Tanks
     {
         private class RegularBullet : Bullet
         {
-            public RegularBullet(double speed, double orientation, PointF pos) : base(speed, orientation, pos) { }
-
-            public override void Step()
-            {
-                base.Step();
-            }
+            public RegularBullet(double speed, double orientation, PointF pos, Color color)
+                : base(speed, orientation, pos, color) { }
         }
 
         public const double _weight = 5;
@@ -27,8 +23,8 @@ namespace Tanks
         public const double speed = 30; // will be added to tank's speed
         public const double regular_bullet_damage = 35;
 
-        public RegularWeapon(int id, List<Tank> tanks)
-            : base(id, _weight, _reloadTime, tanks)
+        public RegularWeapon(int id, List<Tank> tanks, Color color)
+            : base(id, _weight, _reloadTime, tanks, color)
         {
             damage = regular_bullet_damage;
             lastFireTime = DateTime.MinValue;
@@ -39,7 +35,7 @@ namespace Tanks
         {
             if ((DateTime.Now - lastFireTime).Milliseconds > reloadTime)
             {
-                bullets.Add(new RegularBullet(speed + t.currentSpeed, t.orientation, t.pos));
+                bullets.Add(new RegularBullet(speed + t.currentSpeed, t.orientation, t.pos, color));
                 lastFireTime = DateTime.Now;
             }
         }
@@ -48,9 +44,10 @@ namespace Tanks
         {
             return p.X > center.X - width / 2 && p.X < center.X + width / 2 && p.Y > center.Y - height / 2 && p.Y < center.Y + height / 2;
         }
-        
-        public override void DrawBullets()
+
+        public override void Draw(Graphics g, Tank t)
         {
+            bullets.ForEach(b => b.Draw(g, t));
         }
     }
 }
